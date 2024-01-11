@@ -1,15 +1,54 @@
 // Trebuchet...
-//
-//
-//
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+const int DIGIT_WORD_COUNT = 10;
+const char *DIGIT_WORDS[] = {"zero", "one", "two",   "three", "four",
+                             "five", "six", "seven", "eight", "nine"};
+
+/**
+ * return null char if no "word digit" is found; otherwise, return 0 through 9
+ */
+char digitOfWord(char *linebuff, size_t linelen, size_t curridx) {
+  // check if the index shows a word which is a "digit" word
+
+  // simple is "if length minus current index is bigger than a word, ext"
+  if (linelen - curridx <= 2) {
+    return '\0';
+  }
+
+  for (int i = 0; i < DIGIT_WORD_COUNT; i++) {
+    // i is the int value of the digit, which makes things easier.
+    const char *currword = DIGIT_WORDS[i];
+
+    // scale over the "current location" on the line until either we hit
+    // currword null terminator or the end of the line.
+    size_t lineidx = curridx, wordidx = 0;
+    for (; lineidx < linelen; lineidx++, wordidx++) {
+      if (currword[wordidx] == '\0') {
+        // word match, return the thing
+        return '0' + i;
+      }
+
+      if (linebuff[lineidx] != currword[wordidx]) {
+        break;
+      }
+    }
+  }
+
+  // loop over the digit words?
+
+  return '\0';
+}
+
+/**
+ * process the line and return the 2-digit code
+ * */
 int getCodeFromLine(char *linebuff, size_t line_len) {
 
-  // fprintf(stdout, "linelen=%d, line=%s", (int) line_len, linebuff);
+  fprintf(stdout, "linelen=%d, line=%s", (int)line_len, linebuff);
   if (line_len == 0)
     return 0;
 
@@ -25,6 +64,13 @@ int getCodeFromLine(char *linebuff, size_t line_len) {
       firstNum = left;
       break;
     }
+
+    // not a digit, check if word.
+    char test = digitOfWord(linebuff, line_len, i);
+    if (test != '\0') {
+      firstNum = test;
+      break;
+    }
   }
 
   // right loop
@@ -36,9 +82,17 @@ int getCodeFromLine(char *linebuff, size_t line_len) {
       lastNum = right;
       break;
     }
+
+    // not a digit, check if word.
+    char test = digitOfWord(linebuff, line_len, i);
+    if (test != '\0') {
+      lastNum = test;
+      fprintf(stdout, "FOUND: %c\n", test);
+      break;
+    }
   }
 
-  // fprintf(stdout, "left=%c, right=%c\n", firstNum, lastNum);
+  fprintf(stdout, "left=%c, right=%c\n", firstNum, lastNum);
   return ((int)(firstNum - '0') * 10) + (lastNum - '0');
 }
 
@@ -71,9 +125,9 @@ int main(int argc, char *argv[]) {
     sum += value;
 
     // temp print statement to show info.
-    // fprintf(stdout, "sum=%d, current=%d, linetext=%s\n", sum, value, linebuff);
+    fprintf(stdout, "sum=%d, current=%d, linetext=%s\n", sum, value, linebuff);
   }
-  
+
   fprintf(stdout, "the sum is: %d\n", sum);
 
   return 0;
