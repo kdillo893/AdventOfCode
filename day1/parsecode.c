@@ -13,7 +13,7 @@ int getCodeFromLine(char *linebuff, size_t line_len) {
   if (line_len == 0)
     return 0;
 
-  char firstNum;
+  char firstNum = '0';
 
   // two loops going over n, first num from the search path put it in.
 
