@@ -21,6 +21,10 @@ void printGame(game_t *game) {
           game->red, game->green, game->blue);
 }
 
+int cubePower(game_t *game) {
+  return game->red * game->green * game->blue;
+}
+
 /**
  * parse the Game line for separate pulls, return the max of cubes
  * Sample game line below:
@@ -137,6 +141,7 @@ int main(int argc, char *argv[]) {
   ssize_t linelen = -1;
 
   int idSum = 0;
+  int powerSum = 0;
 
   game_t *currentGame = malloc(sizeof(game_t));
 
@@ -144,6 +149,10 @@ int main(int argc, char *argv[]) {
 
     // parse the game, returns the "cubes" count
     currentGame = parseGame(currentGame, lineptr, linelen);
+
+    //calculate powersum for EVERY game, not just the good games.
+    powerSum += cubePower(currentGame);
+
     int greenGood = currentGame->green <= maxGreens;
     int redGood = currentGame->red <= maxReds;
     int blueGood = currentGame->blue <= maxBlues;
@@ -156,6 +165,7 @@ int main(int argc, char *argv[]) {
       //         currentGame->green, greenGood ? "true" : "false",
       //         currentGame->blue, blueGood ? "true" : "false");
       // fprintf(stdout, "currentIdSum=%d\n", idSum);
+
     }
 
     // doing a "getchar" to halt between each.
@@ -165,5 +175,6 @@ int main(int argc, char *argv[]) {
   free(currentGame);
 
   fprintf(stdout, "id sum is: %d\n", idSum);
+  fprintf(stdout, "power sum is: %d\n", powerSum);
   return 0;
 }
