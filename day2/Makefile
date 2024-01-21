@@ -7,7 +7,7 @@ DBUG = -g
 clean: 
 	rm cube
 
-day2:
+cube:
 	$(CC) $(CFLAGS) $(OPTIM) cube.c -o cube 
 
 debug:

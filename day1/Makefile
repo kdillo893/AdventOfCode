@@ -7,7 +7,7 @@ DBUG = -g
 clean: 
 	rm parsecode
 
-day1:
+parsecode:
 	$(CC) $(CFLAGS) $(OPTIM) parsecode.c -o parsecode 
 
 debug:
