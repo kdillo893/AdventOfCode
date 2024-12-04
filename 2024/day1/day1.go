@@ -18,6 +18,7 @@ func absInt(a int, b int) int {
   return b - a
 }
 
+
 func main()  {
   fmt.Println("Hello World!")
 
@@ -35,8 +36,7 @@ func main()  {
 
     defer file.Close()
 
-    first:= []int{}
-    second:= []int{}
+    var first, second []int
 
     //read file line-by-line, first number into left array, second into right.
     reader := bufio.NewReader(file)
@@ -77,18 +77,54 @@ func main()  {
     //length of each should be 1000, just double checking
     fmt.Println(len(first), len(second))
 
-    //segment the summing into pieces; can vary the speed...
-    //For now lets just do the simple single-thread
-    sum := 0
-    for i:=0; i < len(first); i++ {
-      diff:= absInt(first[i], second[i])
-      fmt.Println(first[i], second[i], diff)
+    //segment the summing into pieces; can vary the speed with worker #s
+    chunkSize := 50
+    numWorkers := int(len(first) / chunkSize)
 
-      sum+= diff
+    //need worker to round out the end if un-even slicing.
+    if numWorkers * chunkSize < len(first) {
+      numWorkers++
     }
 
-    fmt.Println(sum)
+    //sum total has a mutex for putting worker results.
+    var mut sync.Mutex
+    sumTotal := 0
 
+    for work := 0; work < numWorkers; work++ {
 
+      start := work * chunkSize
+      end := start + chunkSize
+
+      //truncate if overflowing past length of arrays
+      if (end > len(first)) {
+        end = len(first)
+        if len(first) == start {
+          break
+        }
+      }
+
+      wg.Add(1)
+      go func(start int, end int) {
+
+        defer wg.Done()
+
+        workerSum := 0
+
+        for i:= start; i < end; i++ {
+          diff:= absInt(first[i], second[i])
+          fmt.Println(first[i], second[i], diff)
+
+          workerSum += diff
+        }
+
+        mut.Lock()
+        sumTotal += workerSum
+        mut.Unlock()
+      }(start, end)
+    }
+
+    wg.Wait()
+
+    fmt.Println(sumTotal)
   }
 }
