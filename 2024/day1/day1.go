@@ -12,119 +12,126 @@ import (
 )
 
 func absInt(a int, b int) int {
-  if a > b {
-    return a - b
-  }
-  return b - a
+	if a > b {
+		return a - b
+	}
+	return b - a
 }
 
+func pt1(list1 []int, list2 []int) int {
+	//sort the list1 and list2 arrays, make it a goroutine
+	//waitgroup for syncing with sorting arrays
+	var wg sync.WaitGroup
 
-func main()  {
-  fmt.Println("Hello World!")
+	wg.Add(1)
+	go func() {
+		wg.Done()
+		sort.Ints(list1)
+	}()
+	wg.Add(1)
+	go func() {
+		wg.Done()
+		sort.Ints(list2)
+	}()
 
-  //import the file to parse:
-  if len(os.Args) == 2 {
-    //the filename to parse is the index 1 of args.
-    filename := os.Args[1]
+	wg.Wait()
+	//length of each should be 1000, just double checking
+	// fmt.Println(len(list1), len(list2))
 
-    //read relative file line-by-line
-    file,err := os.Open(filename)
+	//segment the summing into pieces; can vary the speed with worker #s
+	chunkSize := 50
+	numWorkers := int(len(list1) / chunkSize)
 
-    if err != nil {
-      log.Fatalf("can't open file: %s", filename)
-    }
+	//need worker to round out the end if un-even slicing.
+	if numWorkers*chunkSize < len(list1) {
+		numWorkers++
+	}
 
-    defer file.Close()
+	//sum total has a mutex for putting worker results.
+	var mut sync.Mutex
+	sumTotal := 0
 
-    var first, second []int
+	for work := 0; work < numWorkers; work++ {
 
-    //read file line-by-line, first number into left array, second into right.
-    reader := bufio.NewReader(file)
-    for {
-      line, err := reader.ReadString('\n')
-      if err != nil {
-        fmt.Println("Reader reached end of file")
-        break
-      }
+		start := work * chunkSize
+		end := start + chunkSize
 
-      //have the line, put segments into array
-      parts := strings.Fields(line)
+		//truncate if overflowing past length of arrays
+		if end > len(list1) {
+			end = len(list1)
+			if len(list1) == start {
+				break
+			}
+		}
 
-      firstval, err := strconv.Atoi(parts[0])
-      secondval, err := strconv.Atoi(parts[1])
+		wg.Add(1)
+		go func(start int, end int) {
+
+			defer wg.Done()
+
+			workerSum := 0
+
+			for i := start; i < end; i++ {
+				diff := absInt(list1[i], list2[i])
+				// fmt.Println(list1[i], list2[i], diff)
+
+				workerSum += diff
+			}
+
+			mut.Lock()
+			sumTotal += workerSum
+			mut.Unlock()
+		}(start, end)
+	}
+
+	wg.Wait()
 
 
-      first = append(first, firstval)
-      second = append(second, secondval)
-    }
+	return sumTotal
+}
 
-    //sort the first and second arrays, make it a goroutine
-    //waitgroup for syncing with sorting arrays
-    var wg sync.WaitGroup
+func main() {
 
-    wg.Add(1)
-    go func() {
-      wg.Done()
-      sort.Ints(first)
-    }()
-    wg.Add(1)
-    go func() {
-      wg.Done()
-      sort.Ints(second)
-    }()
+	//import the file to parse:
+	if len(os.Args) == 2 {
+		//the filename to parse is the index 1 of args.
+		filename := os.Args[1]
 
-    wg.Wait()
-    //length of each should be 1000, just double checking
-    fmt.Println(len(first), len(second))
+		//read relative file line-by-line
+		file, err := os.Open(filename)
 
-    //segment the summing into pieces; can vary the speed with worker #s
-    chunkSize := 50
-    numWorkers := int(len(first) / chunkSize)
+		if err != nil {
+			log.Fatalf("can't open file: %s", filename)
+		}
 
-    //need worker to round out the end if un-even slicing.
-    if numWorkers * chunkSize < len(first) {
-      numWorkers++
-    }
+		defer file.Close()
 
-    //sum total has a mutex for putting worker results.
-    var mut sync.Mutex
-    sumTotal := 0
+		var first []int
+    var second []int
 
-    for work := 0; work < numWorkers; work++ {
+		//read file line-by-line, first number into left array, second into right.
+		reader := bufio.NewReader(file)
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				fmt.Println("Reader reached end of file")
+				break
+			}
 
-      start := work * chunkSize
-      end := start + chunkSize
+			//have the line, put segments into array
+			parts := strings.Fields(line)
 
-      //truncate if overflowing past length of arrays
-      if (end > len(first)) {
-        end = len(first)
-        if len(first) == start {
-          break
-        }
-      }
+			firstval, err := strconv.Atoi(parts[0])
+			secondval, err := strconv.Atoi(parts[1])
 
-      wg.Add(1)
-      go func(start int, end int) {
+			first = append(first, firstval)
+			second = append(second, secondval)
+		}
+    
+    sumDiffs := pt1(first, second)
+    fmt.Println(sumDiffs)
 
-        defer wg.Done()
-
-        workerSum := 0
-
-        for i:= start; i < end; i++ {
-          diff:= absInt(first[i], second[i])
-          fmt.Println(first[i], second[i], diff)
-
-          workerSum += diff
-        }
-
-        mut.Lock()
-        sumTotal += workerSum
-        mut.Unlock()
-      }(start, end)
-    }
-
-    wg.Wait()
-
-    fmt.Println(sumTotal)
-  }
+    //are first/second changed from calling the pt1 function?
+    fmt.Println(first)
+	}
 }
