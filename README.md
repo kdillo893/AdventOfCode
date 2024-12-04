@@ -1,3 +1,3 @@
-# Advent of Code 2023
+# Advent of Code
 
-** CURRENTLY ABANDONED UNTIL I MAKE SOME THINGS **
+BACK FOR 2024. I'm trying to focus on concurrency/threads. I'm familiar with single-threaded stuff, I haven't needed to think about multi-threaded things since college, so I want to force myself to learn it again.
