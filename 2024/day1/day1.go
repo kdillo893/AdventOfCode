@@ -109,6 +109,10 @@ func main() {
 		var first []int
     var second []int
 
+    //part2, value multiplied by instances right and left.
+    firstMap := make(map[int]int)
+    secondMap := make(map[int]int)
+
 		//read file line-by-line, first number into left array, second into right.
 		reader := bufio.NewReader(file)
 		for {
@@ -126,12 +130,38 @@ func main() {
 
 			first = append(first, firstval)
 			second = append(second, secondval)
+
+      //add the value to map if not there, otherwise increment.
+      _,ok1 := firstMap[firstval]
+      if ok1 {
+        firstMap[firstval]++
+      } else {
+        firstMap[firstval] = 1
+      }
+
+      _,ok2 := secondMap[secondval]
+      if ok2 {
+        secondMap[secondval]++
+      } else {
+        secondMap[secondval] = 1
+      }
 		}
     
+    // fmt.Println(first)
     sumDiffs := pt1(first, second)
     fmt.Println(sumDiffs)
 
-    //are first/second changed from calling the pt1 function?
-    fmt.Println(first)
+    //pt2: looping over keys creating similarity score
+    simScore := 0
+    //single threaded way is just go through each key in the first map and check for second
+    //TODO: how to parse this range in multi-threaded way? would need worker per bucket...
+    for key, firstcount := range firstMap {
+      secondcount, ok := secondMap[key]
+      if ok {
+        simScore += key * firstcount * secondcount
+      }
+    }
+
+    fmt.Println(simScore)
 	}
 }
