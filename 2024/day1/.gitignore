@@ -1,3 +1,10 @@
 # aoc provided test/result file and my own edit
 input.txt
 testinput2.txt
+
+#trace files for checking things
+multitrace.out
+singletrace.out
+
+# go build outputs
+day1
