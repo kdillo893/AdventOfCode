@@ -1,0 +1,2 @@
+# special thing for headers so I can curl the input text from terminal
+header.env

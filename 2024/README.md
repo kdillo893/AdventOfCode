@@ -7,3 +7,7 @@ things appropriately with Java.
 
 The first problem is "solve it simply", then to "solve it piecewise with concurrency",
 and develop a mechanism for fetching next things to process per thread.
+
+## FUTURE REFERENCE
+Anything I curl from the site for input is gzip compressed, so I have to pipe 
+the results to unzip it.
