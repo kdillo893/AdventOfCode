@@ -24,6 +24,37 @@ function isTwiceDigits(id) {
   return false;
 }
 
+/**
+ * check if the id number has repeated digits anywhere
+ */
+function isRepeatedDigits(id) {
+  id = String(id);
+
+  //growing portions of checks from "1" up to "len/2"
+  //starting at the "len/2" sub-size parts is likely the easiest.
+
+  for (let subSize = Math.floor(id.length / 2); subSize > 0; subSize--) {
+    //if not divisible by the substring length, go next
+    if (id.length % subSize != 0) continue;
+
+    //split the id into parts of size subSize, check if all are equal
+    //I would prefer a faster way than looping for slices.
+    const parts = [];
+    for (let i = 0; i < id.length; i += subSize) {
+      parts.push(id.slice(i, i + subSize));
+    }
+
+    const isRepeated = parts.every(part => part == parts[0]);
+
+    if (isRepeated) {
+      console.log({ parts, id, subSize })
+      return isRepeated;
+    }
+  }
+
+  return false;
+}
+
 
 function main() {
   console.log("processing", process.argv[2]);
@@ -46,7 +77,8 @@ function main() {
             length: Math.ceil(end - start + 1)
           },
           (_, i) => start + i)
-          .filter((id) => isTwiceDigits(id));
+          //.filter((id) => isTwiceDigits(id));
+          .filter((id) => isRepeatedDigits(id));
 
         //console.log(badIds);
 
