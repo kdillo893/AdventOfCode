@@ -1,0 +1,7 @@
+.headers
+
+# input files
+*/input.txt
+*/test1.txt
+**/input.txt
+**/test1.txt

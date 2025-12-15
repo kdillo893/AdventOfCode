@@ -1,6 +1,7 @@
 # aoc provided test/result file and my own edit
 input.txt
 testinput2.txt
+testinput.txt
 
 #trace files for checking things
 multitrace.out
